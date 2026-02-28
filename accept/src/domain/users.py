@@ -1,8 +1,8 @@
 from typing import Self
 
-from api.schemas import VacancyCreate
+from api.schemas.vacancy import VacancyCreate
 
-from domain.app import App
+from client import App
 from domain.vacancy import Vacancy
 from domain.application import Application
 
@@ -21,12 +21,20 @@ class Applicant(User):
         super().__init__(app)
 
     def apply(self, vacancy: Vacancy) -> Application:
-        return Application()
+        public_schema = self.app.post_application(vacancy.vacancy)
+        return Application.from_public_schema(
+            application=public_schema
+        )
 
 
 class Employer(User):
     def __init__(self, app: App) -> None:
         super().__init__(app)
+        self.name = "test employer"
 
     def post_vacancy(self, vacancy: VacancyCreate) -> Vacancy:
-        return Vacancy()
+        public_schema = self.app.post_vacancy(self.name, vacancy)
+        return Vacancy(
+            employer_client=self.app,
+            vacancy=public_schema
+        )

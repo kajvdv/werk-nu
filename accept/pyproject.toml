@@ -6,8 +6,14 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "backend",
+    "httpx>=0.28.1",
     "pytest>=9.0.2",
+    "python-dotenv>=1.2.1",
 ]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.uv.sources]
 backend = { path = "../backend", editable = true }
