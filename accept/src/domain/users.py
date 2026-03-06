@@ -1,40 +1,20 @@
 from typing import Self
 
-from api.schemas.vacancy import VacancyCreate
 
+from api.schemas.message import MessageCreate
 from client import App
-from domain.vacancy import Vacancy
-from domain.application import Application
 
 
 class User:
-    def __init__(self, app: App) -> None:
-        self.app = app
-        self.messages = []
+    def __init__(self) -> None:
+        self.app = App() # Every user has their own app/client
+        self._messages = []
+        self.user_id = 1
     
-    def send_message(self, to: Self, text: str):
-        ...
+    def send_message(self, to: str, message: MessageCreate):
+        self.app.send_message(to, message)
 
-
-class Applicant(User):
-    def __init__(self, app: App) -> None:
-        super().__init__(app)
-
-    def apply(self, vacancy: Vacancy) -> Application:
-        public_schema = self.app.post_application(vacancy.vacancy)
-        return Application.from_public_schema(
-            application=public_schema
-        )
-
-
-class Employer(User):
-    def __init__(self, app: App) -> None:
-        super().__init__(app)
-        self.name = "test employer"
-
-    def post_vacancy(self, vacancy: VacancyCreate) -> Vacancy:
-        public_schema = self.app.post_vacancy(self.name, vacancy)
-        return Vacancy(
-            employer_client=self.app,
-            vacancy=public_schema
-        )
+    @property
+    def messages(self):
+        messages = self.app.get_messages(self.user_id)
+        return [m["text"] for m in messages]

@@ -2,8 +2,15 @@ import pytest
 
 from api.schemas.vacancy import VacancyCreate
 
-from domain.users import Employer, Applicant
+from domain.employer import Employer
+from domain.applicant import Applicant
 
+
+@pytest.fixture(name="message_controller")
+def message_controller_fixture(conn):
+    from api.dependencies.message import MessageController
+    controller = MessageController(conn)
+    return controller
 
 
 class TestApplying:
@@ -32,9 +39,9 @@ class TestApplying:
             name="test user"
         ))
     
-    def test_applicant_can_apply_to_vacancy_posted_by_employer(self, app, vacancy_data):
-        employer = Employer(app)
-        applicant = Applicant(app)
+    def test_applicant_can_apply_to_vacancy_posted_by_employer(self, vacancy_data):
+        employer = Employer.from_name("Acme Corp")
+        applicant = Applicant.from_id("1")
 
         vacancy = employer.post_vacancy(vacancy_data)
         application = applicant.apply(vacancy)
@@ -42,9 +49,9 @@ class TestApplying:
         assert application == vacancy.received_applications()[0]
 
 
-    def test_employer_can_reach_out_to_applicant_after_reviewing_application(self, app, vacancy_data):
-        employer = Employer(app)
-        applicant = Applicant(app)
+    def test_employer_can_reach_out_to_applicant_after_reviewing_application(self, vacancy_data):
+        employer = Employer.from_name("Acme Corp")
+        applicant = Applicant.from_id("1")
 
         vacancy = employer.post_vacancy(vacancy_data)
         application = applicant.apply(vacancy)

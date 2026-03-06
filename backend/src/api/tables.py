@@ -4,7 +4,8 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
-    ForeignKey
+    ForeignKey,
+    Text
 )
 
 
@@ -33,4 +34,11 @@ application = Table(
     "application", metadata,
     Column("user_id", ForeignKey("user.id"), primary_key=True),
     Column("vacancy_id", ForeignKey("user.id"), primary_key=True),
+)
+
+message = Table(
+    "messages", metadata,
+    Column("id", Integer, primary_key=True),
+    Column("recipient_id", ForeignKey("user.id"), nullable=False),
+    Column("text", Text)
 )
