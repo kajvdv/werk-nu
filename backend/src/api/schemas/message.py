@@ -6,7 +6,7 @@ class MessageBase(BaseModel):
 
 
 class MessageCreate(MessageBase):
-    recipient_id: int
+    ...
 
 
 class MessagePublic(MessageBase):

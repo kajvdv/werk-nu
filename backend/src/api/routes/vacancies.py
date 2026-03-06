@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import insert, select, Connection
 
 from api.database import get_conn
-from api.tables import vacancy
+from api.tables import vacancy, organization
 from api.schemas.vacancy import VacancyPublic, VacancyCreate
 
 
@@ -16,19 +16,29 @@ def get_vacancies_of_org_route(organization: str):
 
 @router.post("", response_model=VacancyPublic)
 def post_vacancy_route(
-    organization: str,
+    # organization: str,
     vacancy_data: VacancyCreate,
-    session: Connection = Depends(get_conn)
+    connection: Connection = Depends(get_conn),
 ):
     stmt = (
-        insert(vacancy)
-        .values(**vacancy_data.model_dump())
-        .returning(vacancy.c.id)
+        select(organization.c.id)
+        .where(organization.c.public_id == vacancy_data.organization_id)
     )
-    id = session.scalar(stmt)
-    session.commit()
+    organization_id = connection.execute(stmt).scalar()
+    stmt = (
+        insert(vacancy)
+        .values(
+            organization_id=organization_id,
+            **vacancy_data.model_dump(exclude={"organization_id"})
+        )
+        .returning(
+            vacancy.c.public_id,
+        )
+    )
+    public_id = connection.scalar(stmt)
+    connection.commit()
     return {
-        "id": str(id),
+        "public_id": public_id,
         "title": "test",
-        "organization": organization
+        "organization_id": vacancy_data.organization_id
     }

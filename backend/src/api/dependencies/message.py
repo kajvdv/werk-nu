@@ -13,10 +13,13 @@ class MessageController:
     ) -> None:
         self.conn = conn
 
-    def add_message(self, message_data: MessageCreate):
+    def add_message(self, recipient_id, message_data: MessageCreate):
         stmt = (
             insert(message)
-            .values(**message_data.model_dump())
+            .values(
+                recipient_id=recipient_id,
+                **message_data.model_dump()
+            )
             .returning(message)
         )
         row = self.conn.execute(stmt).first()

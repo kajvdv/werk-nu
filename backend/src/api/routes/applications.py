@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends, Path
 from sqlalchemy import select, insert, Connection
 
-from api.schemas.applicant import ApplicantPublic, ApplicationCreate
+from api.schemas.applicant import ApplicantPublic
 from api.schemas.vacancy import VacancyDB
-from api.schemas.user import UserDB
-from api.tables import application, user, vacancy
+from api.tables import application, user
 from api.dependencies.vacancy import get_vacancy
-from api.dependencies.user import get_user
 from api.database import get_conn
+from api.deps import (
+    get_current_user,
+    get_vacancy_service,
+    get_user_service,
+)
 
 
 router = APIRouter()
@@ -15,25 +18,18 @@ router = APIRouter()
 
 @router.post("", response_model=ApplicantPublic)
 def post_application(
-    # application_data: ApplicationCreate,
-    # vacancy_id: int
-        vacancy: VacancyDB = Depends(get_vacancy),
-        user: UserDB = Depends(get_user),
-        conn: Connection = Depends(get_conn)
+        user_public = Depends(get_current_user),
+        vacancy_service = Depends(get_vacancy_service),
+        user_service = Depends(get_user_service),
+        vacancy_id = Path()
 ):
-    stmt = (
-        insert(application)
-        .values({
-            "vacancy_id": 1,
-            "user_id": 1,
-        })
-    )
-    conn.execute(stmt)
-    conn.commit()
-    return {
-        "user": user.model_dump(),
-        "vacancy": vacancy.model_dump()
-    }
+    user_db = user_service.get_user(user_public)
+    vacancy_db = vacancy_service.get_vacancy_by_pulic_id(vacancy_id)
+    return vacancy_service.apply(user_db, vacancy_db)
+    # return ApplicantPublic.model_validate({
+    #     "user": user_db.model_dump(),
+    #     "vacancy": vacancy_db.model_dump()
+    # })
 
 @router.get("", response_model=list[ApplicantPublic])
 def get_applications(
@@ -42,9 +38,7 @@ def get_applications(
         conn: Connection = Depends(get_conn)
 ):
     stmt = (
-        select(   
-            user,    
-        )
+        select(user)
         .join(application, application.c.user_id == user.c.id)
         .where(application.c.vacancy_id == vacancy_db.id)
     )

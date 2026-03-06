@@ -1,23 +1,22 @@
-from pydantic import BaseModel, field_validator
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class VacancyBase(BaseModel):
     title: str
-    organization: str
 
 
 class VacancyCreate(VacancyBase):
-    ...
+    organization_id: UUID
 
 
 class VacancyPublic(VacancyBase):
-    id: str
-
-    @field_validator("id", mode="before")
-    @classmethod
-    def obfuscate_id(cls, value): #TODO: encrypt id somehow
-        return str(value)
+    organization_id: UUID
+    id: UUID = Field(validation_alias="public_id")
 
 
 class VacancyDB(VacancyBase):
     id: int
+    public_id: UUID
+    organization_id: int

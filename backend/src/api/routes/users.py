@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 
 from api.schemas.message import MessageCreate, MessagePublic
 from api.dependencies.user import UserController
@@ -16,10 +16,11 @@ def get_user_messages_route(
     return messages
 
 
-@router.post("/{user_id}/messages", response_model=MessagePublic)
+@router.post("/{recipient_id}/messages", response_model=MessagePublic)
 def post_user_message_route(
         message_data: MessageCreate,
+        recipient_id: str = Path(),
         message_controller: MessageController = Depends()
 ):
-    message = message_controller.add_message(message_data)
+    message = message_controller.add_message(recipient_id, message_data)
     return message

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -10,5 +12,5 @@ class OrganizationCreate(OrganizationBase):
 
 
 class OrganizationDB(OrganizationBase):
-    # id: int
-    ...
+    id: int
+    public_id: UUID

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, UUID4
 
 
 class UserBase(BaseModel):
@@ -10,13 +10,9 @@ class UserCreate(UserBase):
 
 
 class UserPublic(UserBase):
-    id: str
-
-    @field_validator("id", mode="before")
-    @classmethod
-    def obfuscate_id(cls, value): #TODO: encrypt id somehow
-        return str(value)
+    id: UUID4 = Field(validation_alias="public_id")
 
 
 class UserDB(UserBase):
     id: int
+    public_id: UUID4

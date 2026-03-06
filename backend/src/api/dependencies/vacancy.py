@@ -7,12 +7,12 @@ from api.database import get_conn
 
 
 def get_vacancy(
-        vacancy_id: int,
+        vacancy_id: str,
         conn: Connection = Depends(get_conn)
     ) -> VacancyDB:
     stmt = (
         select(vacancy)
-        .where(vacancy.c.id == vacancy_id)
+        .where(vacancy.c.public_id == vacancy_id)
     )
     row = conn.execute(stmt).first()
     if not row:

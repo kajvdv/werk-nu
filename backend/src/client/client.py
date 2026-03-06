@@ -8,9 +8,8 @@ from api.schemas.message import MessageCreate
 
 
 class App:
-    def __init__(self) -> None:
-        # TODO: Dependency inject client (for use Fastapi testclient)
-        self.client = httpx.Client(base_url="http://localhost:8000")
+    def __init__(self, client: httpx.Client) -> None:
+        self.client = client
     
     def post_vacancy(self, organization: str, vacancy: VacancyCreate) -> VacancyPublic:
         response = self.client.post(
@@ -20,21 +19,21 @@ class App:
             )
         )
         assert response.status_code == 200
-        return VacancyPublic.model_validate(response.json())
+        return VacancyPublic.model_validate(response.json(), by_name=True)
 
     def post_application(self, vacancy: VacancyPublic):
         response = self.client.post(
-            url=f"/{vacancy.organization}/vacancies/{vacancy.id}/applications",
+            url=f"/{vacancy.organization_id}/vacancies/{vacancy.id}/applications",
         )
         assert response.status_code == 200
-        return ApplicantPublic.model_validate(response.json())
+        return ApplicantPublic.model_validate(response.json(), by_name=True)
 
     def get_applicants(self, vacancy: VacancyPublic) -> list[ApplicantPublic]:
         response = self.client.get(
-            url=f"/{vacancy.organization}/vacancies/{vacancy.id}/applications"
+            url=f"/{vacancy.organization_id}/vacancies/{vacancy.id}/applications"
         )
         assert response.status_code == 200
-        return [ApplicantPublic.model_validate(a) for a in response.json()]
+        return [ApplicantPublic.model_validate(a, by_name=True) for a in response.json()]
     
     def get_messages(self, user_id):
         response = self.client.get(f"/users/{user_id}/messages")

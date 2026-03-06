@@ -1,21 +1,11 @@
 from fastapi import Depends
 from sqlalchemy import insert, select, Connection
+import nanoid
 
 from api.schemas.user import UserCreate, UserDB
 from api.schemas.message import MessageDB
 from api.tables import user, message
 from api.database import get_conn
-
-
-def get_user(
-        conn: Connection = Depends(get_conn)
-):
-    stmt = (
-        select(user)
-        .where(user.c.id == 1)
-    )
-    row = conn.execute(stmt).first()
-    return UserDB.model_validate(row, from_attributes=True)
 
 
 class UserController:
@@ -26,9 +16,13 @@ class UserController:
         self.conn = conn 
     
     def add_user(self, user_data: UserCreate):
+        public_id = nanoid.generate(size=12)
         stmt = (
             insert(user)
-            .values(**user_data.model_dump())
+            .values(
+                public_id=public_id,
+                **user_data.model_dump()
+            )
             .returning(user)
         )
         row = self.conn.execute(stmt).first()
@@ -37,8 +31,16 @@ class UserController:
         self.conn.commit()
         return UserDB.model_validate(row, from_attributes=True)
 
+    def get_user(self):
+        stmt = (
+            select(user)
+            .where(user.c.id == 1)
+        )
+        row = self.conn.execute(stmt).first()
+        return UserDB.model_validate(row, from_attributes=True)
+
     def get_messages(self):
-        user = get_user(self.conn)
+        user = self.get_user()
         stmt = (
             select(message)
             .where(message.c.recipient_id == user.id)

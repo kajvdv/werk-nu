@@ -15,27 +15,27 @@ def message_controller_fixture(conn):
 
 class TestApplying:
     @pytest.fixture
-    def vacancy_data(self):
-        return VacancyCreate(
-            title="test vacancy",
-            organization="test employer"
-        )
-    
-    @pytest.fixture(autouse=True)
-    def add_employer(self, conn):
+    def organization(self, conn):
         from api.dependencies.organization import OrganizationController
         from api.schemas.organization import OrganizationCreate
         controller = OrganizationController(conn)
-        controller.add_organization(OrganizationCreate(
+        return controller.add_organization(OrganizationCreate(
             name="test employer"
         ))
+    
+    @pytest.fixture
+    def vacancy_data(self, organization):
+        return VacancyCreate(
+            title="test vacancy",
+            organization_id=organization.public_id
+        )
 
     @pytest.fixture(autouse=True)
     def add_applicant(self, conn):
-        from api.dependencies.user import UserController
+        from api.services.user import UserService
         from api.schemas.user import UserCreate
-        controller = UserController(conn)
-        controller.add_user(UserCreate(
+        user_service = UserService(conn)
+        user_service.create_user(UserCreate(
             name="test user"
         ))
     
@@ -60,3 +60,7 @@ class TestApplying:
         )
 
         assert "We'd love to schedule an interview!" in applicant.messages
+
+    
+    def test_get_overview_of_applied_vacancies(self):
+        """User gets all the vacancies they applied to"""

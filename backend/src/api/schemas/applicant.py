@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from .user import UserPublic
-from .vacancy import VacancyPublic
+from .user import UserPublic, UserDB
+from .vacancy import VacancyPublic, VacancyDB
 
 class ApplicantBase(BaseModel):
     ...
@@ -12,7 +12,11 @@ class ApplicantPublic(ApplicantBase):
     vacancy: VacancyPublic
 
 
-class ApplicationCreate(BaseModel):
+class ApplicationCreate(ApplicantBase):
     # vacancy: VacancyPublic
     ...
     
+
+class ApplicationDB(ApplicantBase):
+    user: UserDB
+    vacancy: VacancyDB

@@ -1,5 +1,6 @@
 from typing import Self
 
+import httpx
 
 from api.schemas.message import MessageCreate
 from client import App
@@ -7,7 +8,7 @@ from client import App
 
 class User:
     def __init__(self) -> None:
-        self.app = App() # Every user has their own app/client
+        self.app = App(client=httpx.Client(base_url="http://localhost:8000")) # Every user has their own app/client
         self._messages = []
         self.user_id = 1
     
