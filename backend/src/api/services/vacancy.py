@@ -18,6 +18,17 @@ class VacancyService:
         self.conn = conn
         self.organization_service = organization_service
 
+    def publify_vacancy(self, vacancy_db) -> VacancyPublic:
+        # TODO: Put this into the organization service
+        organization_id = self.conn.scalar(
+            select(organization.c.public_id)
+            .where(organization.c.id == vacancy_db.organization_id)
+        )
+        return VacancyPublic.model_validate({
+            "organization_id": organization_id,
+            **vacancy_db.model_dump(exclude={"organization_id"})
+        })
+
     def create_vacancy(self, data: VacancyCreate):
         organization_id = self.conn.scalar(
             select(organization.c.id)

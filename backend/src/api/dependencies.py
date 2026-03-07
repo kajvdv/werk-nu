@@ -1,4 +1,3 @@
-# TODO: Change to dependencies.py later
 import uuid
 
 from fastapi import Depends
@@ -9,6 +8,7 @@ from api.schemas.user import UserPublic
 from api.services.organization import OrganizationService
 from api.services.user import UserService
 from api.services.vacancy import VacancyService
+from api.services.message import MessageService
 
 
 def get_current_user():
@@ -35,3 +35,9 @@ def get_user_service(
         conn: Connection = Depends(get_conn),
 ): 
     return UserService(conn)
+
+
+def get_message_service(
+        conn: Connection = Depends(get_conn),
+):
+    return MessageService(conn)

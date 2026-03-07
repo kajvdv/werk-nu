@@ -16,10 +16,10 @@ def message_controller_fixture(conn):
 class TestApplying:
     @pytest.fixture
     def organization(self, conn):
-        from api.dependencies.organization import OrganizationController
+        from api.services.organization import OrganizationService
         from api.schemas.organization import OrganizationCreate
-        controller = OrganizationController(conn)
-        return controller.add_organization(OrganizationCreate(
+        controller = OrganizationService(conn)
+        return controller.create_organization(OrganizationCreate(
             name="test employer"
         ))
     
