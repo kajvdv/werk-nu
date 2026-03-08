@@ -11,3 +11,4 @@ engine = create_engine(DATABASE_URL, echo=False)
 def get_conn():
     with engine.connect() as conn:
         yield conn
+        conn.commit()

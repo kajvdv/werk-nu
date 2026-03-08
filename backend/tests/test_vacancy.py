@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from client import App
 from api.schemas.vacancy import VacancyCreate, VacancyPublic
 from api.schemas.user import UserCreate, UserPublic
-from api.schemas.organization import OrganizationCreate
+from api.schemas.organization import OrganizationCreate, OrganizationDB
 
 
 class TestApplyToVacancy:
@@ -23,9 +23,10 @@ class TestApplyToVacancy:
     def test_post_new_vacancy(self,
             app: App,
             vacancy_create,
-            organization_db
+            organization_db: OrganizationDB,
     ):
-        vacancy = app.post_vacancy(organization_db.name, vacancy_create)
+        app.login(organization_db.email, "password")
+        vacancy = app.post_vacancy(vacancy_create)
         assert vacancy.title == "test vacancy"
 
     

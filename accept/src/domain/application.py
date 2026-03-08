@@ -1,36 +1,34 @@
-from typing import Self
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from api.schemas.applicant import ApplicantPublic
 from api.schemas.message import MessageCreate
 
+if TYPE_CHECKING:
+    from domain.vacancy import Vacancy
+    from client import App
+
 
 class Application:
 
-    applications: dict[tuple[str, str], Self] = {}
-    def __init__(self, application: ApplicantPublic) -> None:
+    def __init__(self,
+            application: ApplicantPublic,
+            employer_client: App,
+            user_client: App,
+    ) -> None:
         self.application = application
+        self.employer_client = employer_client
+        self.user_client = user_client
 
-    @classmethod
-    def from_public_schema(cls, application: ApplicantPublic):
-        key = (
-            application.user.id,
-            application.vacancy.id
-        )
-        if key in cls.applications:
-            return cls.applications[key]
-        else:
-            value = cls(application)
-            cls.applications[key] = value
-            return value
+    def in_vacancy(self, vacancy: Vacancy) -> bool:
+        for received_application in vacancy.received_applications():
+            if received_application == self.application:
+                return True
+        return False
     
     def send_message(self, text: str):
-        from domain.employer import Employer
-        from domain.applicant import Applicant
-        name = self.application.vacancy.organization
-        employer = Employer.from_name(name)
         message = MessageCreate.model_validate({
             "text": text,
             "recipient_id": self.application.user.id
         })
-        recipient = Applicant.from_id(self.application.user.id)
-        employer.send_message(recipient.user_id, message)
+        self.employer_client.send_message(self.application.user.id, message)

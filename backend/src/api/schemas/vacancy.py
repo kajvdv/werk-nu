@@ -8,7 +8,7 @@ class VacancyBase(BaseModel):
 
 
 class VacancyCreate(VacancyBase):
-    organization_id: UUID
+    ...
 
 
 class VacancyPublic(VacancyBase):

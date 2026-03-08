@@ -1,24 +1,30 @@
-from typing import Self
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from domain.users import User
-from domain.vacancy import Vacancy
 from domain.application import Application
+
+from api.schemas.user import UserCreate
+
+if TYPE_CHECKING:
+    from domain.vacancy import Vacancy
 
 
 class Applicant(User):
-    _applicants: dict[str, Self] = {}
-    
-    @classmethod
-    def from_id(cls, id: str):
-        if id in cls._applicants:
-            return cls._applicants[id]
-        else:
-            applicant = cls()
-            cls._applicants[id] = applicant
-            return applicant
+
+    def __init__(self, email: str) -> None:
+        super().__init__()
+        self.app.register_user(UserCreate(
+            name="Test user",
+            email=email,
+            password="password",
+        ))
+        self.app.login(email, "password")    
     
     def apply(self, vacancy: Vacancy) -> Application:
         public_schema = self.app.post_application(vacancy.vacancy)
-        return Application.from_public_schema(
-            application=public_schema
+        return Application(
+            public_schema,
+            vacancy.employer_client,
+            user_client=self.app,
         )

@@ -5,6 +5,8 @@ from api.schemas.user import UserCreate
 from api.schemas.organization import OrganizationCreate
 from api.schemas.vacancy import VacancyCreate
 
+pytest.register_assert_rewrite("client")
+
 
 @pytest.fixture(autouse=True)
 def load_env_vars():
@@ -43,15 +45,21 @@ def app(client):
 
 
 @pytest.fixture
-def user_service(conn):
-    from api.services.user import UserService
-    return UserService(conn)
+def auth_service(conn):
+    from api.services.auth import AuthService
+    return AuthService(conn)
 
 
 @pytest.fixture
-def organization_service(conn):
+def user_service(conn, auth_service):
+    from api.services.user import UserService
+    return UserService(conn, auth_service)
+
+
+@pytest.fixture
+def organization_service(conn, auth_service):
     from api.services.organization import OrganizationService
-    return OrganizationService(conn)
+    return OrganizationService(conn, auth_service)
 
 
 @pytest.fixture
@@ -61,33 +69,42 @@ def vacancy_service(conn, organization_service):
 
 
 @pytest.fixture
-def user_db(user_service):
-    user_create = UserCreate(
-        name="test user"
+def user_create():
+    return UserCreate(
+        name="test user",
+        email="test@test.com",
+        password="password"
     )
+
+
+@pytest.fixture
+def user_db(user_service, user_create):
     user_db = user_service.create_user(user_create)
+    user_service.conn.commit()
     return user_db
 
 
 @pytest.fixture
 def organization_db(organization_service):
     organization_create = OrganizationCreate(
-        name="test org"
+        name="test org",
+        email="test@org.com",
+        password="password"
     )
     organization_db = organization_service.create_organization(organization_create)
+    organization_service.conn.commit()
     return organization_db
 
 
 @pytest.fixture
 def vacancy_create(organization_db):
-    vacancy_create = VacancyCreate(
+    return VacancyCreate(
         title="test vacancy",
-        organization_id=organization_db.public_id,
     )
-    return vacancy_create
 
 
 @pytest.fixture
-def vacancy_db(vacancy_create, vacancy_service):
-    vacancy_db = vacancy_service.create_vacancy(vacancy_create)
+def vacancy_db(vacancy_create, organization_db, vacancy_service):
+    vacancy_db = vacancy_service.create_vacancy(vacancy_create, organization_db.public_id)
+    vacancy_service.conn.commit()
     return vacancy_db

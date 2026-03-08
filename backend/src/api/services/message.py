@@ -19,7 +19,6 @@ class MessageService:
             .returning(message)
         )
         row = self.conn.execute(stmt).first()
-        self.conn.commit()
         return MessageDB.model_validate(row, from_attributes=True)
     
     def get_messages(self, user_db: UserDB):

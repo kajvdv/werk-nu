@@ -5,6 +5,8 @@ from sqlalchemy import Connection, select, insert
 from api.schemas.vacancy import VacancyCreate, VacancyDB, VacancyPublic
 from api.schemas.user import UserDB, UserPublic
 from api.schemas.applicant import ApplicantPublic
+from api.queries.user import select_user
+from api.queries.organization import select_organization
 from api.tables import vacancy, organization, application, user
 
 from .organization import OrganizationService
@@ -18,22 +20,16 @@ class VacancyService:
         self.conn = conn
         self.organization_service = organization_service
 
-    def publify_vacancy(self, vacancy_db) -> VacancyPublic:
+    def publify_vacancy(self, vacancy_db: VacancyDB) -> VacancyPublic:
         # TODO: Put this into the organization service
-        organization_id = self.conn.scalar(
-            select(organization.c.public_id)
-            .where(organization.c.id == vacancy_db.organization_id)
-        )
+        organization_id = self.conn.execute(select_organization(id=vacancy_db.organization_id)).first()
         return VacancyPublic.model_validate({
-            "organization_id": organization_id,
+            "organization_id": organization_id.public_id,
             **vacancy_db.model_dump(exclude={"organization_id"})
         })
 
-    def create_vacancy(self, data: VacancyCreate):
-        organization_id = self.conn.scalar(
-            select(organization.c.id)
-            .where(organization.c.public_id == data.organization_id)
-        )
+    def create_vacancy(self, data: VacancyCreate, organization_id: UUID):
+        organization_id = self.conn.scalar(select_organization(public_id=organization_id))
         stmt = (
             insert(vacancy)
             .values({
@@ -43,7 +39,6 @@ class VacancyService:
             .returning(vacancy)
         )
         row = self.conn.execute(stmt).first()
-        self.conn.commit()
         return VacancyDB.model_validate(row, from_attributes=True)
     
     def get_vacancy_by_pulic_id(self, public_id: UUID) -> VacancyDB:
@@ -62,36 +57,33 @@ class VacancyService:
                 "vacancy_id": vacancy_db.id,
             })
         )
-        self.conn.commit()
         # TODO: Put this into the organization service
-        organization_id = self.conn.scalar(
-            select(organization.c.public_id)
-            .where(organization.c.id == vacancy_db.organization_id)
-        )
+        organization = self.conn.execute(select_organization(
+            id=vacancy_db.organization_id
+        )).first()
         return ApplicantPublic.model_validate({
             "user": user_db.model_dump(),
             "vacancy": VacancyPublic.model_validate({
-                "organization_id": organization_id,
+                "organization_id": organization.public_id,
                 **vacancy_db.model_dump(exclude={"organization_id"})
             }),
         })
 
     def get_applications(self, vacancy_db: VacancyDB) -> list[ApplicantPublic]:
         rows = self.conn.execute(
-            select(user)
+            select_user()
             .join(application, user.c.id == application.c.user_id)
             .where(application.c.vacancy_id == vacancy_db.id)
         )
         # TODO: Put this into the organization service
-        organization_id = self.conn.scalar(
-            select(organization.c.public_id)
-            .where(organization.c.id == vacancy_db.organization_id)
-        )
+        organization = self.conn.execute(select_organization(
+            id=vacancy_db.organization_id
+        )).first()
         return [
             ApplicantPublic.model_validate({
                 "user": UserPublic.model_validate(row, from_attributes=True),
                 "vacancy": VacancyPublic.model_validate({
-                    "organization_id": organization_id,
+                    "organization_id": organization.public_id,
                     **vacancy_db.model_dump(exclude={"organization_id"})
                 }),
             })

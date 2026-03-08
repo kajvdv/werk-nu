@@ -17,15 +17,22 @@ metadata = MetaData()
 
 user = Table(
     "user", metadata,
+    Column("id", ForeignKey("auth_user.id"), primary_key=True),
+    Column("name", String, nullable=False),
+)
+
+auth_user = Table(
+    "auth_user", metadata,
     Column("id", Integer, primary_key=True),
     Column("public_id", UUID(as_uuid=True), default=uuid.uuid4, nullable=False),
-    Column("name", String)
+    Column("email", String, nullable=False),
+    Column("hashed_password", String, nullable=False),
+    Column("entity_type", String, nullable=False),
 )
 
 organization = Table(
     "organization", metadata,
-    Column("id", Integer, primary_key=True),
-    Column("public_id", UUID(as_uuid=True), default=uuid.uuid4, nullable=False),
+    Column("id", ForeignKey("auth_user.id"), primary_key=True),
     Column("name", String, unique=True, nullable=False)
 )
 
@@ -34,7 +41,7 @@ vacancy = Table(
     Column("id", Integer, primary_key=True),
     Column("public_id", UUID(as_uuid=True), nullable=False, default=uuid.uuid4),
     Column("organization_id", ForeignKey("organization.id"), nullable=False),
-    Column("title", String),
+    Column("title", String, nullable=False),
 )
 
 application = Table(
