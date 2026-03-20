@@ -41,7 +41,6 @@ class TestApplyToVacancy:
 
         assert len(applications) == 1
         assert applications[0].user.name == "test user"
-        # assert applications[0].vacancy.oraganization == "test org"
 
 
     def test_apply_to_vacancy_with_app(self, app, vacancy_db):

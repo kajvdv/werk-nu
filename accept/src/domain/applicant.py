@@ -14,12 +14,14 @@ class Applicant(User):
 
     def __init__(self, email: str) -> None:
         super().__init__()
+        pw = "password"
         self.app.register_user(UserCreate(
             name="Test user",
             email=email,
-            password="password",
+            password=pw,
         ))
-        self.app.login(email, "password")    
+        self._activate_account()
+        self.app.login(email, pw)    
     
     def apply(self, vacancy: Vacancy) -> Application:
         public_schema = self.app.post_application(vacancy.vacancy)

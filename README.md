@@ -8,6 +8,10 @@ The repo contains multiple roots. Each uses uv for package management.
 
 https://docs.astral.sh/uv/getting-started/installation/
 
+Acceptance tests use Mailpit as a dev SMTP server on localhost:1025, and the API on localhost:8025.
+
+https://mailpit.axllent.org/docs/install/
+
 ### Backend
 ```
 cd backend

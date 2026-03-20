@@ -1,9 +1,18 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 
 from api.schemas.user import UserCreate
 from api.schemas.organization import OrganizationCreate
 from api.schemas.vacancy import VacancyCreate
+
+if TYPE_CHECKING:
+    from api.services.auth import AuthService
+    from api.services.user import UserService
+
 
 pytest.register_assert_rewrite("client")
 
@@ -35,7 +44,11 @@ def fastapi_app():
 
 @pytest.fixture
 def client(fastapi_app):
-    return TestClient(fastapi_app)
+    BACKEND_URL = os.environ['BACKEND_URL']
+    return TestClient(
+        fastapi_app,
+        base_url=BACKEND_URL
+    )
 
 
 @pytest.fixture
@@ -45,9 +58,15 @@ def app(client):
 
 
 @pytest.fixture
-def auth_service(conn):
+def mail_service():
+    from api.services.mail import MailService
+    return MailService()
+
+
+@pytest.fixture
+def auth_service(conn, mail_service):
     from api.services.auth import AuthService
-    return AuthService(conn)
+    return AuthService(conn, mail_service)
 
 
 @pytest.fixture
@@ -78,8 +97,15 @@ def user_create():
 
 
 @pytest.fixture
-def user_db(user_service, user_create):
+def user_db(
+        user_service: UserService,
+        auth_service: AuthService,
+        user_create: UserCreate,
+):
     user_db = user_service.create_user(user_create)
+    code = auth_service.get_code_for_user(user_db.id)
+    assert code
+    auth_service.activate_account(code)
     user_service.conn.commit()
     return user_db
 

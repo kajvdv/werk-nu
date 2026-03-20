@@ -20,6 +20,7 @@ class Employer(User):
             email=email,
             password=pw
         ))
+        self._activate_account()
         self.app.login(email, pw)
 
     def create_vacancy(self, vacancy: VacancyCreate) -> Vacancy:

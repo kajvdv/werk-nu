@@ -1,9 +1,10 @@
-from pydantic import BaseModel, EmailStr, UUID4
+from pydantic import BaseModel, EmailStr, UUID4, Field
 
 
 class AuthBase(BaseModel):
     email: EmailStr
     entity_type: str
+    active: bool = Field(default=False)
 
 
 class AuthCreate(AuthBase):

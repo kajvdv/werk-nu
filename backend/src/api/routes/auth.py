@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Path
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
@@ -31,10 +31,18 @@ def token_route(
             entity_db = organization_service.get_organization(id=auth_user_db.id)
         access_token = auth_service.create_access_token(TokenCreate(
             sub=form_data.username,
-            id=entity_db.public_id,
             entity_type=auth_user_db.entity_type,
-            **entity_db.model_dump(exclude={"public_id", "id"}),
+            active=auth_user_db.active,
+            **entity_db.model_dump(exclude={"id"}),
         ))
         return {"access_token": access_token, "token_type": "bearer"} # TODO: Put in Pydantic schema
     else:
         raise HTTPException(status_code=401)
+
+
+@router.post("/register/activate/{code}", status_code=204)
+def activate_account_route(
+        code: str = Path(),
+        auth_service: AuthService = Depends(get_auth_service),
+):
+    auth_service.activate_account(code)

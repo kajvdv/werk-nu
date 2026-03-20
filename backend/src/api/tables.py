@@ -7,7 +7,8 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
-    Text
+    Text,
+    Boolean,
 )
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -28,6 +29,13 @@ auth_user = Table(
     Column("email", String, nullable=False),
     Column("hashed_password", String, nullable=False),
     Column("entity_type", String, nullable=False),
+    Column("active", Boolean, nullable=False, default=False)
+)
+
+activation_link = Table(
+    "activation_link", metadata,
+    Column("code", String, nullable=False),
+    Column("user_id", ForeignKey("auth_user.id"))
 )
 
 organization = Table(

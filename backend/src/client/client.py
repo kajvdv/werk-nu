@@ -23,6 +23,11 @@ class App:
         assert response.status_code == 201
         return response.json()
 
+    def activate_account(self, code):
+        response = self.client.post(f"/register/activate/{code}")
+        assert response.status_code == 204, response.reason_phrase
+        return
+
     def login(self, email: str, password: str):
         response = self.client.post("/token", data={
             "username": email,

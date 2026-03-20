@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy import Connection
 
 from api.database import get_conn
@@ -11,12 +11,15 @@ from api.services.user import UserService
 from api.services.vacancy import VacancyService
 from api.services.message import MessageService
 from api.services.auth import AuthService
+from api.services.mail import MailService
 from auth import oauth2_scheme
 from auth.auth import decode_token
 
 
 def get_current_user(token = Depends(oauth2_scheme)):
     payload = decode_token(token)
+    if not payload['active']:
+        raise HTTPException(status_code=401)
     return UserPublic.model_validate(payload, by_name=True)
 
 
@@ -25,10 +28,15 @@ def get_current_organization(token = Depends(oauth2_scheme)):
     return OrganizationPublic.model_validate(payload, by_name=True)
 
 
+def get_mail_service():
+    return MailService()
+
+
 def get_auth_service(
         conn: Connection = Depends(get_conn),
+        mail_service: MailService = Depends(get_mail_service),
 ):
-    return AuthService(conn)
+    return AuthService(conn, mail_service)
     
 
 def get_organization_service(
