@@ -1,4 +1,4 @@
-from api.services.mail import MailService, Mail
+from backend.services.mail import MailService, Mail
 
 
 class MailServiceMock(MailService):

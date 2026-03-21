@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from api.schemas.user import UserPublic, UserCreate
+from backend.schemas.user import UserPublic
 
 
 def test_primary_key_not_public(user_service, user_create):

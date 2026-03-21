@@ -5,16 +5,13 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-from api.schemas.user import UserCreate
-from api.schemas.organization import OrganizationCreate
-from api.schemas.vacancy import VacancyCreate
+from backend.schemas.user import UserCreate
+from backend.schemas.organization import OrganizationCreate
+from backend.schemas.vacancy import VacancyCreate
 
 if TYPE_CHECKING:
-    from api.services.auth import AuthService
-    from api.services.user import UserService
-
-
-pytest.register_assert_rewrite("client")
+    from backend.services.auth import AuthService
+    from backend.services.user import UserService
 
 
 @pytest.fixture(autouse=True)
@@ -25,20 +22,20 @@ def load_env_vars():
 
 @pytest.fixture(name="conn")
 def connection_fixture():
-    from api.database import get_conn
+    from backend.database import get_conn
     for conn in get_conn():
         yield conn
 
 
 @pytest.fixture(autouse=True)
 def resetdb(conn):
-    from cli.main import resetdb
+    from backend.cli import resetdb
     resetdb()
 
 
 @pytest.fixture
 def fastapi_app():
-    from api.main import app
+    from backend.main import app
     return app
 
 
@@ -52,38 +49,32 @@ def client(fastapi_app):
 
 
 @pytest.fixture
-def app(client):
-    from client import App
-    return App(client=client)
-
-
-@pytest.fixture
 def mail_service():
-    from api.services.mail import MailService
+    from backend.services.mail import MailService
     return MailService()
 
 
 @pytest.fixture
 def auth_service(conn, mail_service):
-    from api.services.auth import AuthService
+    from backend.services.auth import AuthService
     return AuthService(conn, mail_service)
 
 
 @pytest.fixture
 def user_service(conn, auth_service):
-    from api.services.user import UserService
+    from backend.services.user import UserService
     return UserService(conn, auth_service)
 
 
 @pytest.fixture
 def organization_service(conn, auth_service):
-    from api.services.organization import OrganizationService
+    from backend.services.organization import OrganizationService
     return OrganizationService(conn, auth_service)
 
 
 @pytest.fixture
 def vacancy_service(conn, organization_service):
-    from api.services.vacancy import VacancyService
+    from backend.services.vacancy import VacancyService
     return VacancyService(conn, organization_service)
 
 

@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.133.1",
+    "httpx>=0.28.1",
     "psycopg2-binary>=2.9.11",
     "pwdlib[argon2]>=0.3.0",
     "pydantic[email]>=2.12.5",
@@ -18,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-backend = "cli.main:main"
+backend = "backend.cli:main"
 
 [build-system]
 requires = ["setuptools"]

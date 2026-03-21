@@ -3,16 +3,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-from api.schemas.token import TokenCreate
-from api.schemas.user import UserDB, UserCreate
-from api.services.mail import Mail, MailService
-from client import App
+from backend.schemas.token import TokenCreate
+from backend.schemas.user import UserDB, UserCreate
 
 from mocks.mail import MailServiceMock
 
 if TYPE_CHECKING:
-    from api.services.auth import AuthService
+    from backend.services.auth import AuthService
 
 
 class TestAuthUser:
@@ -50,18 +49,35 @@ class TestRegister:
     
     @pytest.fixture(autouse=True)
     def mock_mail_service(self, fastapi_app: FastAPI, mail_service: MailServiceMock):
-        from api.dependencies import get_mail_service
+        from backend.dependencies import get_mail_service
         fastapi_app.dependency_overrides[get_mail_service] = lambda: mail_service
     
     def test_register_applicant(self,
             mail_service: MailServiceMock,
             auth_service: AuthService,
-            app: App,
+            client: TestClient,
             user_create: UserCreate,
     ):
-        app.register_user(user_create)
+        response = client.post("/users", json=user_create.model_dump())
+        assert response.status_code == 201
+
         activation_link = mail_service.get_last_mail().content
         code = activation_link.split("/")[-1]
-        app.activate_account(code)
+        
+        response = client.post(f"/register/activate/{code}")
+        assert response.status_code == 204, response.reason_phrase
+
         auth_user_db = auth_service.get_auth_user(user_create.email)
         assert auth_user_db.active
+
+    def test_activate_user(self,
+            client: TestClient,
+            user_create,
+            user_service,
+            auth_service
+    ):
+        user_db = user_service.create_user(user_create)
+        code = auth_service.get_code_for_user(user_db.id)
+        user_service.conn.commit()
+        response = client.post(f"/register/activate/{code}")
+        assert response.status_code == 204, response.reason_phrase

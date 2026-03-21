@@ -2,50 +2,57 @@ import pytest
 from dotenv import load_dotenv
 import httpx
 
+pytest.register_assert_rewrite("accept")
 
-pytest.register_assert_rewrite("client")
+from accept.drivers import Driver
+from accept.drivers.http import HttpDriver
+from storyteller import StoryTeller
 
 
-@pytest.fixture(autouse=True)
+class HttpDriverFactory:
+    def create_driver(self) -> Driver:
+        return HttpDriver()
+
+
+@pytest.fixture(autouse=True, scope="class")
 def load_env_vars():
     load_dotenv(".env")
 
 
-@pytest.fixture(name="conn", autouse=True)
-def connection(load_env_vars):
-    from api.database import engine, get_conn
-    from api.tables import metadata
-    metadata.create_all(engine)
-    for conn in get_conn():
-        yield conn
-    metadata.drop_all(engine)
+@pytest.fixture(autouse=True)
+def reset_db():
+    from backend.cli import resetdb
+    resetdb()
+
+
+@pytest.fixture(params=["http"], scope="class")
+def driver_factory(request, load_env_vars):
+    driver_name = request.param
+    match driver_name:
+        case "http":
+            return HttpDriverFactory()
+        case _:
+            raise Exception(f"No driver for {driver_name}")
 
 
 @pytest.fixture
-def app():
-    from client import App
-    return App(httpx.Client(base_url="http://localhost:8000/"))
+def story_teller(driver_factory):
+    return StoryTeller(driver_factory)
 
 
 @pytest.fixture
-def auth_service(conn):
-    from api.services.auth import AuthService
-    return AuthService(conn)
+def acme_corp(story_teller):
+    return story_teller.spawn_employer(
+        name="Acme Corp",
+        email="info@acmecorp.com",
+        password="password"
+    )
 
 
 @pytest.fixture
-def user_service(conn, auth_service):
-    from api.services.user import UserService
-    return UserService(conn, auth_service)
-
-
-@pytest.fixture
-def organization_service(conn, auth_service):
-    from api.services.organization import OrganizationService
-    return OrganizationService(conn, auth_service)
-
-
-@pytest.fixture
-def vacancy_service(conn, organization_service):
-    from api.services.vacancy import VacancyService
-    return VacancyService(conn, organization_service)
+def john_doe(story_teller):
+    return story_teller.spawn_applicant(
+        name="John Doe",
+        email="johndoe@mail.com",
+        password="password"
+    )

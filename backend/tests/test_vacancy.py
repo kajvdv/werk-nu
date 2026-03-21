@@ -1,39 +1,76 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import pytest
-from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-from client import App
-from api.schemas.vacancy import VacancyCreate, VacancyPublic
-from api.schemas.user import UserCreate, UserPublic
-from api.schemas.organization import OrganizationCreate, OrganizationDB
+from backend.schemas.vacancy import VacancyCreate, VacancyPublic, VacancyDB
+from backend.schemas.user import UserDB
+from backend.schemas.applicant import ApplicantPublic
+from backend.schemas.organization import OrganizationCreate, OrganizationDB
+from backend.schemas.token import TokenCreate
+
+if TYPE_CHECKING:
+    from backend.services.auth import AuthService
+    from backend.services.vacancy import VacancyService
 
 
-class TestApplyToVacancy:
+class TestPostVacancy:
 
     @pytest.fixture(autouse=True)
-    def dependency_inject_fastapi(self, fastapi_app: FastAPI, user_db):
-        from api.dependencies import get_current_user
-        def get_current_user_override():
-            return UserPublic.model_validate({
-                **user_db.model_dump()
-            })
-        
-        fastapi_app.dependency_overrides[get_current_user] = get_current_user_override
+    def auth_client(self,
+            client: TestClient,
+            organization_db: OrganizationDB,
+            auth_service: AuthService
+    ):
+        token_create = TokenCreate.model_validate({
+            "sub": organization_db.name,
+            "email": organization_db.email,
+            "name": organization_db.name,
+            "id": organization_db.public_id,
+            "entity_type": "organization",
+            "active": True
+        }, by_name=True)
+        token = auth_service.create_access_token(token_create)
+        client.headers['Authorization'] = f"Bearer {token}"
 
 
     def test_post_new_vacancy(self,
-            app: App,
-            vacancy_create,
-            organization_db: OrganizationDB,
+            client: TestClient,
+            vacancy_create: VacancyCreate,
     ):
-        app.login(organization_db.email, "password")
-        vacancy = app.post_vacancy(vacancy_create)
+        response = client.post(
+            url=f"/me/vacancies",
+            json=vacancy_create.model_dump()
+        )
+        assert response.status_code == 200
+        vacancy = VacancyPublic.model_validate(response.json(), by_name=True)
         assert vacancy.title == "test vacancy"
 
+
+class TestApply:
+
+    @pytest.fixture(autouse=True)
+    def auth_client(self,
+            client: TestClient, 
+            user_db: UserDB, 
+            auth_service: AuthService,
+    ):
+        token_create = TokenCreate.model_validate({
+            "sub": user_db.name,
+            "email": user_db.email,
+            "name": user_db.name,
+            "id": user_db.public_id,
+            "entity_type": "organization",
+            "active": True
+        }, by_name=True)
+        token = auth_service.create_access_token(token_create)
+        client.headers['Authorization'] = f"Bearer {token}"
     
     def test_apply_to_vacancy_with_service(self,
-            vacancy_service,
-            vacancy_db,
-            user_db,
+            vacancy_service: VacancyService,
+            vacancy_db: VacancyDB,
+            user_db: UserDB,
     ):
 
         vacancy_service.apply(user_db, vacancy_db)
@@ -43,11 +80,14 @@ class TestApplyToVacancy:
         assert applications[0].user.name == "test user"
 
 
-    def test_apply_to_vacancy_with_app(self, app, vacancy_db):
+    def test_apply_to_vacancy_through_endpoint(self, client, user_db, vacancy_db):
         vacancy_public = VacancyPublic.model_validate({
             "organization_id": vacancy_db.public_id,
             **vacancy_db.model_dump(exclude={"organization_id"}),
         })
-        application_public = app.post_application(vacancy_public)
+        response = client.post(
+            url=f"/{vacancy_public.organization_id}/vacancies/{vacancy_public.id}/applications",
+        )
+        application_public = ApplicantPublic.model_validate(response.json(), by_name=True)
 
         assert application_public.user.name == "test user"
