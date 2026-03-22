@@ -18,11 +18,12 @@ class UserService:
         self.conn = conn
         self.auth_service = auth_service
 
-    def create_user(self, data: UserCreate):
+    def create_user(self, data: UserCreate, active: bool = False):
         auth_user = self.auth_service.create_auth_user(AuthCreate(
             email=data.email,
             password=data.password,
             entity_type="user",
+            active=active,
         ))
         row = self.conn.execute(
             insert(user)

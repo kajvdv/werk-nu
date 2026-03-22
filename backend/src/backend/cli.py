@@ -1,7 +1,9 @@
 from pathlib import Path
 
 import typer
+from dotenv import load_dotenv
 
+from backend.schemas.user import UserCreate
 
 app = typer.Typer()
 
@@ -27,7 +29,30 @@ def resetdb():
     metadata.create_all(engine)
 
 
+@app.command()
+def createsuperuser():
+    from backend.services.user import UserService
+    from backend.services.auth import AuthService
+    from backend.services.mail import MailService
+    from backend.database import get_conn
+
+    name = input("Name: ")
+    email = input("Email: ")
+    password = input("Password: ")
+    user = UserCreate(
+        name=name,
+        email=email,
+        password=password,
+    ) 
+    for conn in get_conn():
+        mail_service = MailService()
+        auth_service = AuthService(conn, mail_service)
+        user_service = UserService(conn, auth_service)
+        user_service.create_user(user, active=True)
+        
+
 def main():
+    load_dotenv(".env")
     app()
 
 

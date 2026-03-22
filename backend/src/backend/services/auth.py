@@ -48,7 +48,8 @@ class AuthService:
             .returning(auth_user)
         ).first()
         auth_db = AuthDB.model_validate(row, from_attributes=True)
-        self._send_activation_link(auth_db.id)
+        if not auth_db.active:
+            self._send_activation_link(auth_db.id)
         return auth_db
     
     def get_code_for_user(self, user_id: int) -> str | None:

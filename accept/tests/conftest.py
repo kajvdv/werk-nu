@@ -6,12 +6,26 @@ pytest.register_assert_rewrite("accept")
 
 from accept.drivers import Driver
 from accept.drivers.http import HttpDriver
+from accept.drivers.selenium import SeleniumDriver
 from storyteller import StoryTeller
 
 
 class HttpDriverFactory:
     def create_driver(self) -> Driver:
         return HttpDriver()
+
+class SeleniumDriverFactory:
+    def __init__(self) -> None:
+        self.i = 0
+    
+    def _get_next_port(self) -> int:
+        ports = [9222, 9223] # Stupid, I know
+        port = ports[self.i]
+        self.i += 1
+        return port
+    
+    def create_driver(self) -> Driver:
+        return SeleniumDriver(self._get_next_port())
 
 
 @pytest.fixture(autouse=True, scope="class")
@@ -25,12 +39,17 @@ def reset_db():
     resetdb()
 
 
-@pytest.fixture(params=["http"], scope="class")
+@pytest.fixture(params=[
+    # "http",
+    "selenium",
+], scope="class")
 def driver_factory(request, load_env_vars):
     driver_name = request.param
     match driver_name:
         case "http":
             return HttpDriverFactory()
+        case "selenium":
+            return SeleniumDriverFactory()
         case _:
             raise Exception(f"No driver for {driver_name}")
 
