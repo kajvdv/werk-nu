@@ -1,4 +1,6 @@
+from typing import Callable
 import uuid
+from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from sqlalchemy import Connection
@@ -14,6 +16,10 @@ from backend.services.auth import AuthService
 from backend.services.mail import MailService
 from auth import oauth2_scheme
 from auth.auth import decode_token
+
+
+def get_uuid_factory():
+    return uuid.uuid4
 
 
 def get_current_user(token = Depends(oauth2_scheme)):
@@ -35,8 +41,9 @@ def get_mail_service():
 def get_auth_service(
         conn: Connection = Depends(get_conn),
         mail_service: MailService = Depends(get_mail_service),
+        uuid_factory: Callable[[], UUID] = Depends(get_uuid_factory)
 ):
-    return AuthService(conn, mail_service)
+    return AuthService(conn, mail_service, uuid_factory)
     
 
 def get_organization_service(
@@ -48,9 +55,10 @@ def get_organization_service(
 
 def get_vacancy_service(
         conn: Connection = Depends(get_conn),
-        organization_service = Depends(get_organization_service)
+        organization_service = Depends(get_organization_service),
+        uuid_factory: Callable[[], UUID] = Depends(get_uuid_factory),
 ):
-    return VacancyService(conn, organization_service)
+    return VacancyService(conn, organization_service, uuid_factory)
 
 
 def get_user_service(

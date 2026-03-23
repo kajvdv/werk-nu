@@ -1,3 +1,5 @@
+import uuid
+from typing import Callable
 from uuid import UUID
 
 from sqlalchemy import Connection, select, insert
@@ -15,11 +17,14 @@ from .organization import OrganizationService
 class VacancyService:
     def __init__(self,
             conn: Connection,
-            organization_service: OrganizationService
+            organization_service: OrganizationService,
+            uuid_factory: Callable[[], UUID] = uuid.uuid4,
     ) -> None:
         self.conn = conn
         self.organization_service = organization_service
+        self.uuid_factory = uuid_factory
 
+    # I don't like this method. Services should return public schemas.
     def publify_vacancy(self, vacancy_db: VacancyDB) -> VacancyPublic:
         # TODO: Put this into the organization service
         organization_id = self.conn.execute(select_organization(id=vacancy_db.organization_id)).first()
@@ -28,17 +33,31 @@ class VacancyService:
             **vacancy_db.model_dump(exclude={"organization_id"})
         })
 
-    def create_vacancy(self, data: VacancyCreate, organization_id: UUID):
-        organization_id = self.conn.scalar(select_organization(public_id=organization_id))
+    def get_vacancies(self):
+        stmt = (
+            select(vacancy)
+        )
+        rows = self.conn.execute(stmt)
+        return [
+            VacancyDB.model_validate(row, from_attributes=True)
+            for row in rows
+        ]
+
+
+    def create_vacancy(self, data: VacancyCreate, public_organization_id: UUID):
+        organization_id = self.conn.scalar(select_organization(public_id=public_organization_id))
+        print(self.uuid_factory())
         stmt = (
             insert(vacancy)
             .values({
+                "public_id": self.uuid_factory(),
                 "organization_id": organization_id,
                 **data.model_dump(exclude={"organization_id"}),
             })
             .returning(vacancy)
         )
         row = self.conn.execute(stmt).first()
+        print(row)
         return VacancyDB.model_validate(row, from_attributes=True)
     
     def get_vacancy_by_pulic_id(self, public_id: UUID) -> VacancyDB:

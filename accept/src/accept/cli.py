@@ -9,7 +9,7 @@ app = typer.Typer()
 
 
 @app.command()
-def runbrowser(port: int, user: str):
+def runbrowser(user: str, port: int):
     from accept.drivers.selenium.brower import startbrowser
     driver = startbrowser(port, user)
     while True:

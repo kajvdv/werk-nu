@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VacatureApp — Wireframe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f5f0e8;
+    --accent: #d4502a;
+    --muted: #9a9080;
+    --border: #d6cfc0;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #2a2520;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 16px;
+    min-height: 100vh;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    background: #1a1714;
+    padding: 8px;
+    border-radius: 12px;
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+  }
+
+  .nav-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #9a9080;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav-tab.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 860px;
+    background: var(--paper);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  }
+
+  .screen.active { display: block; }
+
+  /* Top bar */
+  .topbar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .topbar-role {
+    font-size: 12px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .topbar-actions { display: flex; gap: 12px; align-items: center; }
+
+  .btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-ghost { background: transparent; color: var(--paper); border: 1px solid rgba(255,255,255,0.2); }
+  .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+  /* Page body */
+  .page { padding: 32px; }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .page-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* Vacancy card */
+  .vacancy-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .vacancy-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: box-shadow 0.2s;
+  }
+
+  .vacancy-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+  .vacancy-info h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .vacancy-meta {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 16px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .tag-open { background: #e8f5e9; color: #2e7d32; }
+  .tag-closed { background: #fce4e4; color: #c62828; }
+  .tag-new { background: #fff3e0; color: #e65100; }
+
+  /* Form */
+  .form-group { margin-bottom: 20px; }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea { resize: vertical; min-height: 100px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Applications list */
+  .application-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .applicant-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+
+  .applicant-info h4 { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+  .applicant-info p { font-size: 13px; color: var(--muted); }
+
+  .app-left { display: flex; align-items: center; }
+  .app-right { display: flex; gap: 8px; align-items: center; }
+
+  /* Messages */
+  .message-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    height: 480px;
+  }
+
+  .message-sidebar {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .message-sidebar-header {
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .convo-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .convo-item:hover, .convo-item.active { background: rgba(212,80,42,0.06); }
+  .convo-item.active { border-left: 3px solid var(--accent); }
+
+  .convo-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .convo-preview { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .message-main { display: flex; flex-direction: column; }
+
+  .message-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .message-header h3 { font-size: 15px; font-weight: 500; }
+  .message-header p { font-size: 12px; color: var(--muted); }
+
+  .message-body { flex: 1; padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+
+  .msg {
+    max-width: 65%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .msg-them { background: var(--white); border: 1px solid var(--border); align-self: flex-start; }
+  .msg-me { background: var(--ink); color: var(--paper); align-self: flex-end; }
+
+  .msg-time { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .message-input-area {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+  }
+
+  .message-input-area .form-input { margin: 0; }
+
+  /* Label */
+  .screen-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6a5f50;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--ink);
+  }
+
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="show('s1')">① Vacatures (werkzoekende)</button>
+  <button class="nav-tab" onclick="show('s2')">② Vacature plaatsen</button>
+  <button class="nav-tab" onclick="show('s3')">③ Sollicitaties bekijken</button>
+  <button class="nav-tab" onclick="show('s4')">④ Berichten</button>
+</div>
+
+<!-- SCREEN 1: Vacature overzicht (werkzoekende) -->
+<div class="screen-label">Scherm 1 van 4</div>
+<div class="screen active" id="s1">
+  <div class="topbar">
+    <div class="logo">werk<span>.</span>nu</div>
+    <div class="topbar-actions">
+      <span class="topbar-role">Ingelogd als: Werkzoekende</span>
+      <button class="btn btn-ghost btn-sm">Mijn sollicitaties</button>
+    </div>
+  </div>
+  <div class="page">
+    <div class="page-title">Openstaande vacatures</div>
+    <div class="page-sub">3 vacatures beschikbaar</div>
+    <div class="vacancy-list">
+      <div class="vacancy-card">
+        <div class="vacancy-info">
+          <h3>Python Developer <span class="tag tag-new">Nieuw</span></h3>
+          <div class="vacancy-meta">
+            <span>Acme Corp</span>
+            <span>Amsterdam</span>
+            <span>Fulltime</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag tag-open">Open</span>
+          <button class="btn btn-primary btn-sm">Solliciteer</button>
+        </div>
+      </div>
+      <div class="vacancy-card">
+        <div class="vacancy-info">
+          <h3>UX Designer</h3>
+          <div class="vacancy-meta">
+            <span>Studio Blauw</span>
+            <span>Utrecht</span>
+            <span>Parttime</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag tag-open">Open</span>
+          <button class="btn btn-primary btn-sm">Solliciteer</button>
+        </div>
+      </div>
+      <div class="vacancy-card" style="opacity:0.5">
+        <div class="vacancy-info">
+          <h3>Data Analist</h3>
+          <div class="vacancy-meta">
+            <span>DataHuis BV</span>
+            <span>Rotterdam</span>
+            <span>Fulltime</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag tag-closed">Gesloten</span>
+          <button class="btn btn-outline btn-sm" disabled>Niet beschikbaar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: Vacature plaatsen (werkgever) -->
+<div class="screen-label">Scherm 2 van 4</div>
+<div class="screen" id="s2">
+  <div class="topbar">
+    <div class="logo">werk<span>.</span>nu</div>
+    <div class="topbar-actions">
+      <span class="topbar-role">Ingelogd als: Werkgever — Acme Corp</span>
+    </div>
+  </div>
+  <div class="page">
+    <div class="page-title">Nieuwe vacature plaatsen</div>
+    <div class="page-sub">Vul de details in. Sollicitanten kunnen direct reageren.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Functietitel</label>
+        <input class="form-input" type="text" placeholder="bijv. Python Developer">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Locatie</label>
+        <input class="form-input" type="text" placeholder="bijv. Amsterdam">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Dienstverband</label>
+        <input class="form-input" type="text" placeholder="Fulltime / Parttime">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Salaris (optioneel)</label>
+        <input class="form-input" type="text" placeholder="bijv. €3.500 – €5.000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Omschrijving</label>
+      <textarea class="form-textarea" placeholder="Beschrijf de rol, taken en vereisten..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-outline">Opslaan als concept</button>
+      <button class="btn btn-primary">Vacature publiceren</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: Sollicitaties bekijken (werkgever) -->
+<div class="screen-label">Scherm 3 van 4</div>
+<div class="screen" id="s3">
+  <div class="topbar">
+    <div class="logo">werk<span>.</span>nu</div>
+    <div class="topbar-actions">
+      <span class="topbar-role">Ingelogd als: Werkgever — Acme Corp</span>
+      <button class="btn btn-ghost btn-sm">Mijn vacatures</button>
+    </div>
+  </div>
+  <div class="page">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-number">12</div>
+        <div class="stat-label">Sollicitaties ontvangen</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Openstaande vacatures</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Berichten verstuurd</div>
+      </div>
+    </div>
+
+    <div class="page-title" style="font-size:20px;margin-bottom:4px">Python Developer</div>
+    <div class="page-sub">4 sollicitaties · Geplaatst 3 dagen geleden</div>
+
+    <div class="application-item">
+      <div class="app-left">
+        <div class="applicant-avatar">SJ</div>
+        <div class="applicant-info">
+          <h4>Sara Jansen</h4>
+          <p>Gesolliciteerd op 24 feb · "Ik heb 5 jaar ervaring met Python..."</p>
+        </div>
+      </div>
+      <div class="app-right">
+        <span class="tag tag-new">Nieuw</span>
+        <button class="btn btn-outline btn-sm">Bekijk</button>
+        <button class="btn btn-primary btn-sm">Stuur bericht</button>
+      </div>
+    </div>
+
+    <div class="application-item">
+      <div class="app-left">
+        <div class="applicant-avatar">MK</div>
+        <div class="applicant-info">
+          <h4>Mark Kuiper</h4>
+          <p>Gesolliciteerd op 23 feb · "Ik zoek een uitdagende rol..."</p>
+        </div>
+      </div>
+      <div class="app-right">
+        <span class="tag tag-open" style="background:#e3f2fd;color:#1565c0">Bekeken</span>
+        <button class="btn btn-outline btn-sm">Bekijk</button>
+        <button class="btn btn-primary btn-sm">Stuur bericht</button>
+      </div>
+    </div>
+
+    <div class="application-item" style="opacity:0.5">
+      <div class="app-left">
+        <div class="applicant-avatar">LB</div>
+        <div class="applicant-info">
+          <h4>Lisa de Bruin</h4>
+          <p>Sollicitatie ingetrokken op 25 feb</p>
+        </div>
+      </div>
+      <div class="app-right">
+        <span class="tag tag-closed">Ingetrokken</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn btn-outline">Vacature sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: Berichten -->
+<div class="screen-label">Scherm 4 van 4</div>
+<div class="screen" id="s4">
+  <div class="topbar">
+    <div class="logo">werk<span>.</span>nu</div>
+    <div class="topbar-actions">
+      <span class="topbar-role">Ingelogd als: Sara Jansen (werkzoekende)</span>
+    </div>
+  </div>
+  <div class="message-layout">
+    <div class="message-sidebar">
+      <div class="message-sidebar-header">Berichten</div>
+      <div class="convo-item active">
+        <div class="convo-name">Acme Corp</div>
+        <div class="convo-preview">We'd love to schedule an interview!</div>
+      </div>
+      <div class="convo-item">
+        <div class="convo-name">Studio Blauw</div>
+        <div class="convo-preview">Bedankt voor je sollicitatie...</div>
+      </div>
+    </div>
+    <div class="message-main">
+      <div class="message-header">
+        <div>
+          <h3>Acme Corp</h3>
+          <p>Re: Python Developer</p>
+        </div>
+      </div>
+      <div class="message-body">
+        <div>
+          <div class="msg msg-them">We'd love to schedule an interview! Ben je volgende week beschikbaar?</div>
+          <div class="msg-time">Acme Corp · gisteren 14:32</div>
+        </div>
+        <div style="align-self:flex-end;text-align:right">
+          <div class="msg msg-me">Ja, dinsdag of woensdag komen goed uit!</div>
+          <div class="msg-time">Jij · gisteren 15:10</div>
+        </div>
+      </div>
+      <div class="message-input-area">
+        <input class="form-input" type="text" placeholder="Typ een bericht...">
+        <button class="btn btn-primary">Verstuur</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

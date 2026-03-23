@@ -1,5 +1,8 @@
 import os
+import uuid
 from secrets import token_urlsafe
+from typing import Callable
+from uuid import UUID
 
 from sqlalchemy import Connection, select, insert, delete, update
 
@@ -14,9 +17,14 @@ BACKEND_URL = os.environ['BACKEND_URL']
 
 
 class AuthService:
-    def __init__(self, conn: Connection, mail_service: MailService) -> None:
+    def __init__(self,
+            conn: Connection,
+            mail_service: MailService,
+            uuid_factory: Callable[[], UUID],
+    ) -> None:
         self.conn = conn
         self.mail_service = mail_service
+        self.uuid_factory = uuid_factory
 
     def _send_activation_link(self, user_id):
         code = token_urlsafe()
@@ -40,6 +48,7 @@ class AuthService:
         row = self.conn.execute(
             insert(auth_user)
             .values({
+                "public_id": self.uuid_factory(),
                 "hashed_password": hashed_password,
                 **auth_create.model_dump(include={
                     "email", "entity_type"

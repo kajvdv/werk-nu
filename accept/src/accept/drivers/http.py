@@ -1,4 +1,3 @@
-import json
 import os
 
 import httpx
@@ -26,7 +25,7 @@ class HttpDriver:
         return response.json()
 
     def activate_account(self, code):
-        response = self.client.post(f"/register/activate/{code}")
+        response = self.client.get(f"/register/activate/{code}")
         assert response.status_code == 204, response.reason_phrase
         return
 
@@ -42,22 +41,22 @@ class HttpDriver:
     
     def post_vacancy(self, vacancy: VacancyCreate) -> VacancyPublic:
         response = self.client.post(
-            url=f"/me/vacancies",
+            url=f"/vacancies",
             json=vacancy.model_dump()
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         return VacancyPublic.model_validate(response.json(), by_name=True)
 
     def post_application(self, vacancy: VacancyPublic) -> ApplicantPublic:
         response = self.client.post(
-            url=f"/{vacancy.organization_id}/vacancies/{vacancy.id}/applications",
+            url=f"/vacancies/{vacancy.id}/applications",
         )
         assert response.status_code == 200
         return ApplicantPublic.model_validate(response.json(), by_name=True)
 
     def get_applicants(self, vacancy: VacancyPublic) -> list[ApplicantPublic]:
         response = self.client.get(
-            url=f"/{vacancy.organization_id}/vacancies/{vacancy.id}/applications"
+            url=f"/vacancies/{vacancy.id}/applications"
         )
         assert response.status_code == 200
         return [ApplicantPublic.model_validate(a, by_name=True) for a in response.json()]

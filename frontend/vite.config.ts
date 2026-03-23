@@ -18,6 +18,7 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
+      port: env.VITE_BASE_URL.split(":").at(-1), // Will break with real urls
       proxy: {
         "/api": {
           target: env.VITE_BACKEND_URL,

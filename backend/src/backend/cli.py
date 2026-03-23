@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 import typer
 from dotenv import load_dotenv
@@ -11,13 +13,17 @@ app = typer.Typer()
 @app.command()
 def runserver(reload: bool = False):
     import uvicorn
+    url = os.environ["BACKEND_URL"]
+    host, port = urlparse(url).netloc.split(":") # Will break with real urls
     uvicorn.run(
         "backend.main:app",
+        host=host,
+        port=int(port),
         env_file=".env",
         reload=reload,
         reload_dirs=[
             str(Path(__file__).parent)
-        ]
+        ] if reload else None
     )
 
 

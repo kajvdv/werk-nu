@@ -40,7 +40,7 @@ def token_route(
         raise HTTPException(status_code=401)
 
 
-@router.post("/register/activate/{code}", status_code=204)
+@router.get("/register/activate/{code}", status_code=204)
 def activate_account_route(
         code: str = Path(),
         auth_service: AuthService = Depends(get_auth_service),

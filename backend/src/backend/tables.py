@@ -25,7 +25,7 @@ user = Table(
 auth_user = Table(
     "auth_user", metadata,
     Column("id", Integer, primary_key=True),
-    Column("public_id", UUID(as_uuid=True), default=uuid.uuid4, nullable=False),
+    Column("public_id", UUID(as_uuid=True), nullable=False),
     Column("email", String, nullable=False),
     Column("hashed_password", String, nullable=False),
     Column("entity_type", String, nullable=False),
@@ -47,7 +47,7 @@ organization = Table(
 vacancy = Table(
     "vacancy", metadata,
     Column("id", Integer, primary_key=True),
-    Column("public_id", UUID(as_uuid=True), nullable=False, default=uuid.uuid4),
+    Column("public_id", UUID(as_uuid=True), nullable=False),
     Column("organization_id", ForeignKey("organization.id"), nullable=False),
     Column("title", String, nullable=False),
 )
