@@ -19,8 +19,8 @@ def reset_db():
 
 
 @pytest.fixture(params=[
-    "http",
-    # "selenium",
+    # "http",
+    "selenium",
 ], scope="class")
 def driver_factory(request, load_env_vars):
     from driver_factory import HttpDriverFactory, SeleniumDriverFactory

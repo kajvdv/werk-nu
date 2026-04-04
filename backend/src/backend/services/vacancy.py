@@ -46,7 +46,6 @@ class VacancyService:
 
     def create_vacancy(self, data: VacancyCreate, public_organization_id: UUID):
         organization_id = self.conn.scalar(select_organization(public_id=public_organization_id))
-        print(self.uuid_factory())
         stmt = (
             insert(vacancy)
             .values({
@@ -57,7 +56,6 @@ class VacancyService:
             .returning(vacancy)
         )
         row = self.conn.execute(stmt).first()
-        print(row)
         return VacancyDB.model_validate(row, from_attributes=True)
     
     def get_vacancy_by_pulic_id(self, public_id: UUID) -> VacancyDB:

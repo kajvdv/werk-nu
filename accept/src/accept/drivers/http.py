@@ -47,7 +47,7 @@ class HttpDriver:
         assert response.status_code == 201
         return VacancyPublic.model_validate(response.json(), by_name=True)
 
-    def post_application(self, vacancy: VacancyPublic) -> ApplicantPublic:
+    def post_application(self, vacancy: VacancyPublic):
         response = self.client.post(
             url=f"/vacancies/{vacancy.id}/applications",
         )

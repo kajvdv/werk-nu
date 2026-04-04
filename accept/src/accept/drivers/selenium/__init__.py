@@ -108,14 +108,18 @@ class SeleniumDriver:
         }, by_name=True)
 
         
-    def post_application(self, vacancy: VacancyPublic) -> ApplicantPublic:
+    def post_application(self, vacancy: VacancyPublic):
         self.driver.get(f"{FRONTEND_URL}/vacancies")
 
-        element = self.driver.find_element(value=str(vacancy.id))
-        # element.
+        element = self.driver.find_element(value=f"{vacancy.id}-apply")
+        element.click()
+
         
     def get_applicants(self, vacancy: VacancyPublic) -> list[ApplicantPublic]:
-        raise NotImplementedError()
+        self.driver.get(f"{FRONTEND_URL}/vacancies/me")
+
+        # element = self.driver.find_element(value=f"{vacancy.id}")
+        # elements = self.driver.find_elements(By.CLASS_NAME, "application")
         
     def get_messages(self) -> list[MessagePublic]:
         raise NotImplementedError()

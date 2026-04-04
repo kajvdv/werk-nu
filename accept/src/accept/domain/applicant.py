@@ -28,5 +28,5 @@ class Applicant(User):
             password=self.password,
         ))
 
-    def apply(self, vacancy: VacancyPublic) -> ApplicantPublic:
-        return self.driver.post_application(vacancy)
+    def apply(self, vacancy: VacancyPublic) -> None:
+        self.driver.post_application(vacancy)

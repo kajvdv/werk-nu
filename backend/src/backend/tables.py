@@ -50,6 +50,9 @@ vacancy = Table(
     Column("public_id", UUID(as_uuid=True), nullable=False),
     Column("organization_id", ForeignKey("organization.id"), nullable=False),
     Column("title", String, nullable=False),
+    Column("organization", String, nullable=False),
+    Column("location", String, nullable=False),
+    Column("availability", String, nullable=False),
 )
 
 application = Table(
