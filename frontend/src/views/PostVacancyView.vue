@@ -1,23 +1,22 @@
 <script setup lang="ts">
+import Heading from '@/components/ui/typography/Heading.vue';
 import PostVacancyForm from '@/components/vacancy/PostVacancyForm.vue';
 import type { VacancyPublic } from '@/types/vacancy';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-const state = ref<VacancyPublic | null>(null)
+const router = useRouter()
 
 function successHandler(data: VacancyPublic) {
-    console.log(data)
-    state.value = data
+    router.push("/vacancies")
 }
 
 </script>
 
 <template>
-    <PostVacancyForm v-if="state == null" @successful="successHandler"/>
-    <div id="submitted-vacancy" v-else-if="state">
-        <div>{{ state.title }}</div>
-        <div>{{ state.organization_id }}</div>
-        <div>{{ state.id }}</div>
-        <button id="confirm-post">Confirm</button>
+    <div class="p-8 max-w-3xl mx-auto">
+        <Heading>Nieuwe vacature plaatsen</Heading>
+        <div class="font-title text-base text-muted mb-6">Vul de details in. Sollicitanten kunnen direct reageren.</div>
+        <PostVacancyForm @successful="successHandler"/>
     </div>
 </template>

@@ -16,7 +16,7 @@ const router = createRouter({
     {path: "/organizations/register", component: RegisterOrgView},
     {path: "/users/register", component: RegisterUserView},
     {path: "/organizations/me", component: OrgHomeView},
-    {path: "/post-vacancy", component: PostVacancyView},
+    {path: "/vacancies/post", component: PostVacancyView},
     {path: "/vacancies/me", component: OrgVacanciesView},
     {path: "/vacancies", component: VacanciesView},
   ],

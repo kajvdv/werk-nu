@@ -31,7 +31,7 @@ const classNames = computed(() => {
 </script>
 
 <template>
-    <button :class="classNames">
+    <button v-bind="$attrs" :class="classNames">
         <slot/>
     </button>
 </template>

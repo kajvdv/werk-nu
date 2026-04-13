@@ -3,11 +3,23 @@ import authApi from "@/api/auth"
 import { ref, computed } from 'vue'
 import type { UserCreate } from '@/types/auth'
 
+function getToken(){
+    const token = sessionStorage.getItem("accessToken")
+    if (!token) return ""
+    else return token
+}
+
 export const useAuthStore = defineStore("auth", () => {
-    const user = ref()
-    const token = ref(sessionStorage.getItem("access_token"))
+    const user = computed(() => {
+        const token = getToken()
+        if (!token) {
+            return {}
+        } else {
+            return JSON.parse(atob(token.split(".")[1]))
+        }
+    })
     const isAuthenticated = computed(() => {
-        if (!user.value || !token.value) return false
+        return !!getToken()
     })
     async function login(username: string, password: string) {
         await authApi.login(username, password)
