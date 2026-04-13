@@ -10,10 +10,11 @@ from backend.schemas.auth import AuthCreate, AuthDB
 from backend.schemas.token import TokenCreate
 from backend.services.mail import MailService, Mail
 from backend.tables import auth_user, activation_link
+from backend.config import settings
 from auth.auth import authenticate_user, hash_password, create_access_token, decode_token
 
 
-BACKEND_URL = os.environ['BACKEND_URL']
+BACKEND_URL = settings.backend_url
 
 
 class AuthService:

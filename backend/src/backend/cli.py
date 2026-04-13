@@ -6,6 +6,11 @@ import typer
 from dotenv import load_dotenv
 
 from backend.schemas.user import UserCreate
+from backend.config import settings
+
+
+BACKEND_URL = settings.backend_url
+
 
 app = typer.Typer()
 
@@ -13,7 +18,7 @@ app = typer.Typer()
 @app.command()
 def runserver(reload: bool = False):
     import uvicorn
-    url = os.environ["BACKEND_URL"]
+    url = BACKEND_URL
     host, port = urlparse(url).netloc.split(":") # Will break with real urls
     uvicorn.run(
         "backend.main:app",

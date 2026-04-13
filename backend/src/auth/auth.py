@@ -5,8 +5,10 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 
-SECRET_KEY_ACCESS = os.environ["SECRET_KEY_ACCESS"]
-SECRET_KEY_REFRESH = os.environ["SECRET_KEY_REFRESH"]
+from .config import settings
+
+SECRET_KEY_ACCESS = settings.secret_key_access
+SECRET_KEY_REFRESH = settings.secret_key_refresh
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 

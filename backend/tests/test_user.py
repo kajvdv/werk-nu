@@ -1,7 +1,3 @@
-from typing import TYPE_CHECKING
-
-import pytest
-
 from backend.schemas.user import UserPublic
 
 

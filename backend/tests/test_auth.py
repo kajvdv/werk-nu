@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI
@@ -7,15 +6,13 @@ from fastapi.testclient import TestClient
 
 from backend.schemas.token import TokenCreate
 from backend.schemas.user import UserDB, UserCreate
+from backend.services.auth import AuthService
 
 from mocks.mail import MailServiceMock
 
-if TYPE_CHECKING:
-    from backend.services.auth import AuthService
-
 
 class TestAuthUser:
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def token_create(self, user_db: UserDB):
         return TokenCreate.model_validate({
             "sub": user_db.name,
@@ -43,7 +40,7 @@ class TestAuthOrg:
 
 
 class TestRegister:
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def mail_service(self):
         return MailServiceMock()
     

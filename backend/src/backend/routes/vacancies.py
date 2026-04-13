@@ -15,7 +15,7 @@ from backend.dependencies import (
 router = APIRouter()
 
 
-@router.get("")
+@router.get("", response_model=list[VacancyPublic])
 def get_vacancies_route(
         vacancy_service: VacancyService = Depends(get_vacancy_service)
 ):

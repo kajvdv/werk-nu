@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 import itertools
 import os
 import uuid
@@ -12,16 +11,17 @@ from backend.schemas.user import UserCreate, UserDB
 from backend.schemas.organization import OrganizationCreate
 from backend.schemas.vacancy import VacancyCreate
 from backend.schemas.token import TokenCreate
-
-if TYPE_CHECKING:
-    from backend.services.auth import AuthService
-    from backend.services.user import UserService
+from backend.services.auth import AuthService
+from backend.services.user import UserService
 
 
 @pytest.fixture(autouse=True, scope="class")
 def load_env_vars():
     from dotenv import load_dotenv
+    from importlib import reload
+    import backend.config
     load_dotenv(".env.test")
+    reload(backend.config)
 
 
 @pytest.fixture(name="conn", scope="class")
