@@ -6,7 +6,7 @@ import RegisterUserView from "@/views/RegisterUserView.vue"
 import { createRouter, createWebHistory } from 'vue-router'
 import PostVacancyView from '@/views/PostVacancyView.vue'
 import VacanciesView from '@/views/VacanciesView.vue'
-import OrgVacanciesView from '@/views/OrgVacanciesView.vue'
+import ManageVacanciesView from '@/views/ManageVacanciesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,7 +17,7 @@ const router = createRouter({
     {path: "/users/register", component: RegisterUserView},
     {path: "/organizations/me", component: OrgHomeView},
     {path: "/vacancies/post", component: PostVacancyView},
-    {path: "/vacancies/me", component: OrgVacanciesView},
+    {path: "/vacancies/me", component: ManageVacanciesView},
     {path: "/vacancies", component: VacanciesView},
   ],
 })

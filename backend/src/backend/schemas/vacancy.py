@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field, field_serializer, UUID4
 
 
@@ -23,7 +25,13 @@ class VacancyPublic(VacancyBase):
         return str(value)
 
 
+class VacancyPublicOwn(VacancyPublic):
+    created_at: datetime
+    applyCount: int
+
+
 class VacancyDB(VacancyBase):
+    created_at: datetime
     id: int
     public_id: UUID4
     organization_id: int

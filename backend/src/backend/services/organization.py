@@ -17,11 +17,12 @@ class OrganizationService:
         self.conn = conn
         self.auth_service = auth_service
 
-    def create_organization(self, data: OrganizationCreate):
+    def create_organization(self, data: OrganizationCreate, active: bool = False):
         auth_user = self.auth_service.create_auth_user(AuthCreate(
             email=data.email,
             password=data.password,
             entity_type="organization",
+            active=active,
         ))
         row = self.conn.execute(
             insert(organization)

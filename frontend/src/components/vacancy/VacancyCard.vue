@@ -5,8 +5,9 @@ import type { VacancyPublic } from '@/types/vacancy';
 import Button from '../ui/Button.vue';
 import { computed } from 'vue';
 
-const {vacancy} = defineProps<{
+const {vacancy, titleBadge} = defineProps<{
     vacancy: VacancyPublic
+    titleBadge?: string
 }>()
 
 const opacityClass = computed(() => vacancy.closed ? 'opacity-50' : 'opacity-100')
@@ -23,20 +24,18 @@ const opacityClass = computed(() => vacancy.closed ? 'opacity-50' : 'opacity-100
       ${opacityClass}
     `">
         <div>
-            <h3>{{ vacancy.title }} <Badge v-if="vacancy.newVacancy" color="yellow">Nieuw</Badge></h3>
+            <h3>{{ vacancy.title }} <Badge v-if="titleBadge" color="yellow">{{ titleBadge }}</Badge></h3>
             <div class="
                 text-xs text-muted
                 flex gap-4
             ">
-                <span>{{ vacancy.organization }}</span>
-                <span>{{ vacancy.location }}</span>
-                <span>{{ vacancy.availability }}</span>
+                <slot name="meta"></slot>
             </div>
         </div>
         <div class="flex gap-3 items-center">
           <Badge v-if="!vacancy.closed" color="green">Open</Badge>
           <Badge v-else color="red">Gesloten</Badge>
-          <Button type="primary">Solliciteer</Button>
+          <slot></slot>
         </div>
     </div>
 </template>

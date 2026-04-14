@@ -12,7 +12,7 @@ from mocks.mail import MailServiceMock
 
 
 class TestAuthUser:
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
     def token_create(self, user_db: UserDB):
         return TokenCreate.model_validate({
             "sub": user_db.name,

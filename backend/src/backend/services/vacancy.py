@@ -2,14 +2,14 @@ import uuid
 from typing import Callable
 from uuid import UUID
 
-from sqlalchemy import Connection, select, insert
+from sqlalchemy import Connection, select, insert, delete, func
 
-from backend.schemas.vacancy import VacancyCreate, VacancyDB, VacancyPublic
+from backend.schemas.vacancy import VacancyCreate, VacancyDB, VacancyPublic, VacancyPublicOwn
 from backend.schemas.user import UserDB, UserPublic
 from backend.schemas.applicant import ApplicantPublic
 from backend.queries.user import select_user
 from backend.queries.organization import select_organization
-from backend.tables import vacancy, organization, application, user
+from backend.tables import vacancy, organization, application, user, auth_user
 
 from .organization import OrganizationService
 
@@ -32,11 +32,35 @@ class VacancyService:
             "organization_id": organization_id.public_id,
             **vacancy_db.model_dump(exclude={"organization_id"})
         })
+    
+    # Remove this is fast as possible
+    def publify_own_vacancy(self, vacancy_db: VacancyDB) -> VacancyPublicOwn:
+        organization_id = self.conn.execute(select_organization(id=vacancy_db.organization_id)).first()
+        apply_count = self._get_apply_count(vacancy_db.id)
+        return VacancyPublicOwn.model_validate({
+            "organization_id": organization_id.public_id,
+            **vacancy_db.model_dump(exclude={"organization_id"}),
+            "applyCount": apply_count
+        })
 
-    def get_vacancies(self):
-        stmt = (
-            select(vacancy)
-        )
+    def _get_apply_count(self, vacancy_id: int):
+        count = self.conn.execute(
+            select(func.count(application.c.vacancy_id))
+            .where(application.c.vacancy_id == vacancy_id)
+        ).scalar()
+        return count
+
+    def get_vacancies(self, org_public_id=None):
+        if org_public_id:
+            stmt = (
+                select(vacancy)
+                .join(auth_user, vacancy.c.organization_id == auth_user.c.id)
+                .where(auth_user.c.public_id == org_public_id)
+            )
+        else:
+            stmt = (
+                select(vacancy)
+            )
         rows = self.conn.execute(stmt)
         return [
             VacancyDB.model_validate(row, from_attributes=True)
@@ -46,6 +70,7 @@ class VacancyService:
 
     def create_vacancy(self, data: VacancyCreate, public_organization_id: UUID):
         organization_id = self.conn.scalar(select_organization(public_id=public_organization_id))
+        assert organization_id
         stmt = (
             insert(vacancy)
             .values({
@@ -57,6 +82,14 @@ class VacancyService:
         )
         row = self.conn.execute(stmt).first()
         return VacancyDB.model_validate(row, from_attributes=True)
+
+    def delete_vacancy(self, vacancy_db: VacancyDB):
+        stmt = (
+            delete(vacancy)
+            .where(vacancy.c.id == vacancy_db.id)
+        )
+        self.conn.execute(stmt)
+        self.conn.commit()
     
     def get_vacancy_by_pulic_id(self, public_id: UUID) -> VacancyDB:
         stmt = (

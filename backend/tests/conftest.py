@@ -15,7 +15,7 @@ from backend.services.auth import AuthService
 from backend.services.user import UserService
 
 
-@pytest.fixture(autouse=True, scope="class")
+@pytest.fixture(autouse=True)
 def load_env_vars():
     from dotenv import load_dotenv
     from importlib import reload
@@ -24,26 +24,26 @@ def load_env_vars():
     reload(backend.config)
 
 
-@pytest.fixture(name="conn", scope="class")
+@pytest.fixture(name="conn")
 def connection_fixture():
     from backend.database import get_conn
     for conn in get_conn():
         yield conn
 
 
-@pytest.fixture(autouse=True, scope="class")
+@pytest.fixture(autouse=True)
 def resetdb(conn):
     from backend.cli import resetdb
     resetdb()
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def fastapi_app():
     from backend.main import app
     return app
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def client(fastapi_app):
     BACKEND_URL = os.environ['BACKEND_URL']
     return TestClient(
@@ -52,7 +52,7 @@ def client(fastapi_app):
     )
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def uuid_factory(fastapi_app):
     from backend.dependencies import get_uuid_factory
     counter = itertools.count(1)
@@ -61,37 +61,37 @@ def uuid_factory(fastapi_app):
     return override
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def mail_service():
     from backend.services.mail import MailService
     return MailService()
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def auth_service(conn, mail_service, uuid_factory):
     from backend.services.auth import AuthService
     return AuthService(conn, mail_service, uuid_factory)
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def user_service(conn, auth_service):
     from backend.services.user import UserService
     return UserService(conn, auth_service)
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def organization_service(conn, auth_service):
     from backend.services.organization import OrganizationService
     return OrganizationService(conn, auth_service)
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def vacancy_service(conn, organization_service, uuid_factory):
     from backend.services.vacancy import VacancyService
     return VacancyService(conn, organization_service, uuid_factory)
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def user_create():
     return UserCreate(
         name="test user",
@@ -100,7 +100,7 @@ def user_create():
     )
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def user_db(
         user_service: UserService,
         auth_service: AuthService,
@@ -114,7 +114,7 @@ def user_db(
     return user_db
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def organization_db(organization_service):
     organization_create = OrganizationCreate(
         name="test org",
@@ -167,14 +167,14 @@ def employer_client(
 
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def vacancy_create(organization_db):
     return VacancyCreate(
         title="test vacancy",
     )
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def vacancy_db(vacancy_create, organization_db, vacancy_service):
     vacancy_db = vacancy_service.create_vacancy(vacancy_create, organization_db.public_id)
     vacancy_service.conn.commit()

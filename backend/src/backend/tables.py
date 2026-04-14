@@ -1,4 +1,4 @@
-import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Table,
@@ -9,6 +9,8 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Boolean,
+    DateTime,
+    func
 )
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -53,6 +55,7 @@ vacancy = Table(
     Column("organization", String, nullable=False),
     Column("location", String, nullable=False),
     Column("availability", String, nullable=False),
+    Column("created_at", DateTime, default=lambda: datetime.now(), nullable=False),
 )
 
 application = Table(

@@ -31,5 +31,6 @@ client = [
     "httpx>=0.28.1",
 ]
 dev = [
+    "freezegun>=1.5.5",
     "pytest>=9.0.2",
 ]

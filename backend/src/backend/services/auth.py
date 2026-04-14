@@ -51,9 +51,7 @@ class AuthService:
             .values({
                 "public_id": self.uuid_factory(),
                 "hashed_password": hashed_password,
-                **auth_create.model_dump(include={
-                    "email", "entity_type"
-                })
+                **auth_create.model_dump(exclude={"password"})
             })
             .returning(auth_user)
         ).first()

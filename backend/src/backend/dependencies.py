@@ -32,7 +32,7 @@ def get_current_user(token = Depends(oauth2_scheme)):
 def get_current_organization(token = Depends(oauth2_scheme)):
     payload = decode_token(token)
     if payload['entity_type'] != "organization":
-        raise HTTPException(status_code=400, detail="Not an organization")
+        raise HTTPException(status_code=404)
     return OrganizationPublic.model_validate(payload, by_name=True)
 
 

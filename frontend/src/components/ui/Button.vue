@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const {type = "primary"} = defineProps<{
-    type: "primary" | "ghost"
+const {type = "primary", small = false} = defineProps<{
+    type?: "primary" | "ghost" | "outline" | "red"
+    small?: boolean
 }>()
 
 const classNames = computed(() => {
@@ -19,13 +20,24 @@ const classNames = computed(() => {
             "text-white",
             "bg-accent"
         ].join(" "),
+        outline: [
+            "bg-transparent",
+            "text-ink",
+            "border",
+            "border-border"
+        ].join(" "),
+        red: [
+            "bg-red-100",
+            "text-red-800",
+            "border-0",
+        ].join(" "),
         ghost: [
             "hover:opacity-85 text-paper",
             "border border-white/20",
         ].join(" ")
     }
 
-    return `${base} ${variants[type] ?? variants.primary}`
+    return `${base} ${variants[type] ?? variants.primary} ${small ? "text-sm" : ""}`
 })
 
 </script>

@@ -16,3 +16,8 @@ export interface VacancyPublic extends VacancyBase {
     newVacancy: boolean
     closed: boolean
 }
+
+export interface VacancyPublicOwn extends VacancyPublic {
+    created_at: string
+    applyCount: number
+}
